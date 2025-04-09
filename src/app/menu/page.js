@@ -37,6 +37,7 @@ const menuItems = [
 
 export default function MenuPage() {
   const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState(""); // NEW
   const [modalContent, setModalContent] = useState(null);
   const [favorites, setFavorites] = useState([]);
 
@@ -68,12 +69,29 @@ export default function MenuPage() {
     setModalContent(null);
   };
 
+  const filteredItems = menuItems.filter((item) => {
+    const matchesFilter = filter === "all" || item.category === filter;
+    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
   return (
     <main className="bg-gray-100 text-center p-6">
       <Navbar />
 
       <h2 className="text-4xl font-semibold mt-6">Menu Manuk</h2>
       <p className="text-gray-500 my-4">Deskripsi singkat tentang menu...</p>
+
+      {/* Search Bar */}
+      <div className="my-4">
+        <input
+          type="text"
+          placeholder="Cari menu..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sm:w-1/2 px-4 py-2 border border-gray-300 rounded"
+        />
+      </div>
 
       <div className="flex justify-center gap-4 my-6 flex-wrap">
         {["all", "sarapan", "makanBerat", "minum", "cemilan"].map((cat) => (
@@ -91,40 +109,38 @@ export default function MenuPage() {
         ))}
       </div>
 
-      <p className="my-4 font-semibold">DI KLIK NGKO MUNCUL POP UP RESEP</p>
+      <p className="my-4 font-semibold">DI KLIK MUNCUL POP UP RESEP</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 container mx-auto">
-        {menuItems
-          .filter((item) => filter === "all" || item.category === filter)
-          .map((item) => (
-            <div
-              key={item.id}
-              className="bg-white p-4 rounded-lg shadow relative"
+        {filteredItems.map((item) => (
+          <div
+            key={item.id}
+            className="bg-white p-4 rounded-lg shadow relative"
+          >
+            <button
+              className={`absolute top-2 right-2 z-10 px-2 py-1 text-xs rounded ${
+                favorites.includes(item.title)
+                  ? "bg-yellow-500 text-white"
+                  : "bg-gray-300 text-gray-800"
+              }`}
+              onClick={() => toggleFavorite(item.title)}
             >
-              <button
-                className={`absolute top-2 right-2 z-10 px-2 py-1 text-xs rounded ${
-                  favorites.includes(item.title)
-                    ? "bg-yellow-500 text-white"
-                    : "bg-gray-300 text-gray-800"
-                }`}
-                onClick={() => toggleFavorite(item.title)}
-              >
-                Favorit
-              </button>
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full rounded-md"
-              />
-              <h3 className="text-lg font-semibold mt-4">{item.title}</h3>
-              <button
-                className="mt-2 w-full bg-blue-500 text-white py-2 rounded"
-                onClick={() => openModal(item)}
-              >
-                Explore Menu
-              </button>
-            </div>
-          ))}
+              Favorit
+            </button>
+            <img
+              src={item.image}
+              alt={item.title}
+              className="w-full rounded-md"
+            />
+            <h3 className="text-lg font-semibold mt-4">{item.title}</h3>
+            <button
+              className="mt-2 w-full bg-blue-500 text-white py-2 rounded"
+              onClick={() => openModal(item)}
+            >
+              Explore Menu
+            </button>
+          </div>
+        ))}
       </div>
 
       {/* Modal */}
